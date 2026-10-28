@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WormZone Royale - Червячки Онлайн</title>
-    <!-- PeerJS & Socket.IO client libraries -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Socket.IO Client -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * {
@@ -36,7 +35,7 @@
             display: block;
         }
 
-        /* Glassmorphism UI Screens */
+        /* Glassmorphism UI */
         .ui-layer {
             position: absolute;
             top: 0;
@@ -62,8 +61,8 @@
             width: 100%;
             height: 100%;
             z-index: 20;
-            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.88) 0%, rgba(7, 10, 19, 0.98) 100%);
-            backdrop-filter: blur(12px);
+            background: radial-gradient(circle at center, rgba(15, 23, 42, 0.9) 0%, rgba(7, 10, 19, 0.98) 100%);
+            backdrop-filter: blur(14px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -170,7 +169,7 @@
             display: block;
         }
 
-        /* Play Tab */
+        /* Play Panel */
         .play-panel {
             display: flex;
             flex-direction: column;
@@ -198,10 +197,9 @@
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
         }
 
-        /* Room Selection Buttons */
         .mode-selection {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             width: 320px;
         }
 
@@ -218,7 +216,7 @@
         }
 
         .btn-room {
-            padding: 10px 16px;
+            padding: 10px 14px;
             font-size: 0.95rem;
             font-weight: 700;
             background: rgba(59, 130, 246, 0.2);
@@ -264,7 +262,21 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Grid for Skins & Cases */
+        /* Mode Toggle Box */
+        .no-bots-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #60a5fa;
+            cursor: pointer;
+        }
+
+        /* Skins Grid */
         .skins-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -392,7 +404,7 @@
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
 
-        /* Roulette Modal / Overlay */
+        /* Roulette Modal */
         #case-roulette-modal {
             display: none;
             position: fixed;
@@ -545,8 +557,7 @@
             font-weight: 700;
             cursor: pointer;
             display: flex;
-            align-items: center;
-            gap: 6px;
+            align-items: gap 6px;
         }
 
         /* HUD Overlay */
@@ -668,7 +679,7 @@
             pointer-events: auto;
         }
 
-        /* Game Over Screen */
+        /* Death Screen */
         #death-modal {
             display: none;
             position: absolute;
@@ -764,7 +775,7 @@
     <!-- MAIN MENU OVERLAY -->
     <div id="main-menu" class="interactive">
         <div class="game-title">WORMS ROYALE</div>
-        <div class="game-subtitle">Мультиплеер Арена • Игра с Друзьями • Пинг</div>
+        <div class="game-subtitle">Онлайн Сервер • Игра с Друзьями • Без Ботов</div>
 
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
@@ -784,12 +795,17 @@
                 <input type="text" id="nickname" class="nickname-input" placeholder="Ваш Никнейм" maxlength="15" value="Червячок #1">
 
                 <div class="mode-selection">
-                    <input type="text" id="room-code-input" class="room-input" placeholder="Код Комнаты" maxlength="6">
+                    <input type="text" id="room-code-input" class="room-input" placeholder="Код Сервера (напр. GLOBAL)" value="GLOBAL">
                     <button class="btn-room" onclick="generateRoomCode()">КОД</button>
                 </div>
 
+                <label class="no-bots-toggle">
+                    <input type="checkbox" id="only-friends-checkbox" checked style="width:18px; height:18px; accent-color:#3b82f6;">
+                    <span>👥 Только живые друзья (БЕЗ БОТОВ)</span>
+                </label>
+
                 <button class="btn-play" onclick="startGame()">В БОЙ!</button>
-                <div style="font-size:0.85rem; color:#94a3b8;" id="room-info-label">Введите одинаковый код с другом, чтобы играть вместе!</div>
+                <div style="font-size:0.85rem; color:#94a3b8;" id="room-info-label">Все друзья с одинаковым кодом сервера играют вместе на одной карте!</div>
             </div>
         </div>
 
@@ -890,13 +906,13 @@
                 <div class="hud-stat-item">🪙 Монеты: <span id="hud-session-coins" style="color: #f6d365;">+0</span></div>
             </div>
             <div class="hud-network">
-                <div>📶 <span id="hud-ping">18 ms</span></div>
-                <div>🌐 Комната: <span id="hud-room-id" style="color:#60a5fa;">#7821</span></div>
+                <div>📶 <span id="hud-ping">22 ms</span></div>
+                <div>🌐 Сервер: <span id="hud-room-id" style="color:#60a5fa;">GLOBAL</span></div>
             </div>
         </div>
 
         <div id="leaderboard">
-            <div class="lb-title">ТОП 10 ИГРОКОВ</div>
+            <div class="lb-title">ИГРОКИ В СЕТИ</div>
             <div id="lb-list"></div>
         </div>
 
@@ -931,7 +947,7 @@
         <button class="btn-main-menu" onclick="returnToMainMenu()">В ГЛАВНОЕ МЕНЮ</button>
     </div>
 
-    <!-- GAME CODE -->
+    <!-- GAME ENGINE CODE -->
     <script>
         /* --- SOUND SYNTHESIZER --- */
         class SoundFX {
@@ -1243,8 +1259,90 @@
         }
 
         /* =========================================================
-           --- GAME CANVAS ENGINE ---
+           --- REAL-TIME MULTIPLAYER WEBSOCKET ENGINE ---
            ========================================================= */
+        let socket = null;
+        let onlinePlayers = {};
+        let mySocketId = null;
+        let isOnlineMode = true;
+
+        function connectSocketServer() {
+            try {
+                // Connects to local or Render server automatically
+                const serverUrl = window.location.origin.includes('http') ? window.location.origin : 'http://localhost:3000';
+                socket = io(serverUrl, { transports: ['websocket', 'polling'] });
+
+                socket.on('connect', () => {
+                    console.log('⚡ Connected to Online Server!');
+                });
+
+                socket.on('init_room', (data) => {
+                    mySocketId = data.myId;
+                    currentRoomId = data.roomId;
+                    onlinePlayers = {};
+                    foods = data.foods || [];
+
+                    Object.keys(data.players).forEach(id => {
+                        if (id !== mySocketId) {
+                            const p = data.players[id];
+                            onlinePlayers[id] = new Worm(p.x, p.y, p.name, false, p.skinId);
+                        }
+                    });
+                });
+
+                socket.on('player_joined', (p) => {
+                    if (p.id !== mySocketId) {
+                        onlinePlayers[p.id] = new Worm(p.x, p.y, p.name, false, p.skinId);
+                    }
+                });
+
+                socket.on('player_moved', (data) => {
+                    if (onlinePlayers[data.id]) {
+                        const p = onlinePlayers[data.id];
+                        p.x = data.x;
+                        p.y = data.y;
+                        p.angle = data.angle;
+                        p.score = data.score;
+                        p.segments = data.segments || [];
+                    }
+                });
+
+                socket.on('food_eaten', (foodId) => {
+                    const idx = foods.findIndex(f => f.id === foodId);
+                    if (idx !== -1) foods.splice(idx, 1);
+                });
+
+                socket.on('food_spawned', (newFoods) => {
+                    if (Array.isArray(newFoods)) foods.push(...newFoods);
+                });
+
+                socket.on('player_died', (deadId) => {
+                    if (onlinePlayers[deadId]) {
+                        delete onlinePlayers[deadId];
+                    }
+                });
+
+                socket.on('player_left', (leftId) => {
+                    delete onlinePlayers[leftId];
+                });
+
+                // Measure Real Ping
+                setInterval(() => {
+                    if (socket && socket.connected) {
+                        const start = Date.now();
+                        socket.emit('ping_check', start, () => {
+                            pingValue = Date.now() - start;
+                            document.getElementById('hud-ping').innerText = `${pingValue} ms`;
+                        });
+                    }
+                }, 2000);
+
+            } catch(e) {
+                console.log('Running in Standalone Local Mode');
+            }
+        }
+
+        /* --- CANVAS GAME ENGINE --- */
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         const miniCvs = document.getElementById('minimap-canvas');
@@ -1256,15 +1354,14 @@
 
         let player = null;
         let bots = [];
-        let remotePlayers = {}; // Connected friends
         let foods = [];
         let sessionKills = 0;
         let sessionCoins = 0;
 
         let mousePos = { x: 0, y: 0 };
         let isBoosting = false;
-        let pingValue = 18;
-        let currentRoomId = '8391';
+        let pingValue = 22;
+        let currentRoomId = 'GLOBAL';
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -1298,16 +1395,12 @@
                 this.isBot = isBot;
                 this.skin = SKINS.find(s => s.id === skinId) || SKINS[0];
                 this.angle = Math.random() * Math.PI * 2;
-                // REDUCED SMOOTH MOVEMENT SPEED (From 3.5 to 2.2 for perfect control!)
-                this.speed = 2.2;
+                this.speed = 2.2; // Smooth speed
                 this.baseRadius = 14;
                 this.length = 30;
                 this.segments = [];
                 this.score = 100;
                 this.isDead = false;
-
-                this.aiTarget = { x: Math.random() * WORLD_SIZE, y: Math.random() * WORLD_SIZE };
-                this.aiTimer = 0;
 
                 for (let i = 0; i < this.length; i++) {
                     this.segments.push({ x: this.x - i * 7, y: this.y });
@@ -1317,41 +1410,19 @@
             update() {
                 if (this.isDead) return;
 
-                let targetAngle = this.angle;
-                let boost = false;
-
-                if (!this.isBot) {
-                    const dx = mousePos.x - canvas.width / 2;
-                    const dy = mousePos.y - canvas.height / 2;
-                    targetAngle = Math.atan2(dy, dx);
-                    boost = isBoosting && this.score > 50;
-                } else {
-                    this.aiTimer++;
-                    if (this.aiTimer > 120 || Math.hypot(this.x - this.aiTarget.x, this.y - this.aiTarget.y) < 50) {
-                        this.aiTarget = { x: Math.random() * (WORLD_SIZE - 200) + 100, y: Math.random() * (WORLD_SIZE - 200) + 100 };
-                        this.aiTimer = 0;
-                    }
-                    targetAngle = Math.atan2(this.aiTarget.y - this.y, this.aiTarget.x - this.x);
-                    if (Math.random() < 0.015) boost = true;
-                }
+                const dx = mousePos.x - canvas.width / 2;
+                const dy = mousePos.y - canvas.height / 2;
+                let targetAngle = Math.atan2(dy, dx);
+                let boost = isBoosting && this.score > 50;
 
                 let diff = targetAngle - this.angle;
                 while (diff < -Math.PI) diff += Math.PI * 2;
                 while (diff > Math.PI) diff -= Math.PI * 2;
-                this.angle += diff * 0.09; // Smooth turning radius
+                this.angle += diff * 0.09;
 
                 const currSpeed = boost ? this.speed * 1.6 : this.speed;
                 if (boost) {
                     this.score = Math.max(20, this.score - (0.1 / (state.upgrades.boost * 0.3)));
-                    if (Math.random() < 0.3) {
-                        foods.push({
-                            x: this.x - Math.cos(this.angle) * 18,
-                            y: this.y - Math.sin(this.angle) * 18,
-                            radius: 3.5,
-                            color: this.skin.colors[0],
-                            value: 1
-                        });
-                    }
                 }
 
                 this.x += Math.cos(this.angle) * currSpeed;
@@ -1369,21 +1440,32 @@
                     this.segments.pop();
                 }
 
-                if (!this.isBot) {
-                    const magnetRadius = 80 + state.upgrades.magnet * 30;
-                    foods.forEach(f => {
-                        const dist = Math.hypot(this.x - f.x, this.y - f.y);
-                        if (dist < magnetRadius) {
-                            f.x += (this.x - f.x) * 0.15;
-                            f.y += (this.y - f.y) * 0.15;
-                        }
-                        if (dist < this.baseRadius + f.radius) {
-                            this.score += f.value;
-                            const earnedCoins = Math.ceil(f.value * 0.2 * state.upgrades.coins);
-                            sessionCoins += earnedCoins;
-                            f.eaten = true;
-                            sfx.playEat();
-                        }
+                // Food attraction & collection
+                const magnetRadius = 80 + state.upgrades.magnet * 30;
+                foods.forEach(f => {
+                    const dist = Math.hypot(this.x - f.x, this.y - f.y);
+                    if (dist < magnetRadius) {
+                        f.x += (this.x - f.x) * 0.15;
+                        f.y += (this.y - f.y) * 0.15;
+                    }
+                    if (dist < this.baseRadius + f.radius) {
+                        this.score += f.value;
+                        sessionCoins += Math.ceil(f.value * 0.2 * state.upgrades.coins);
+                        f.eaten = true;
+                        if (socket && socket.connected && f.id) socket.emit('eat_food', f.id);
+                        sfx.playEat();
+                    }
+                });
+
+                // Sync position with server
+                if (socket && socket.connected) {
+                    socket.emit('update_position', {
+                        x: this.x,
+                        y: this.y,
+                        angle: this.angle,
+                        score: this.score,
+                        isBoosting: boost,
+                        segments: this.segments.slice(0, 30)
                     });
                 }
             }
@@ -1436,8 +1518,10 @@
                 this.isDead = true;
                 sfx.playExplode();
 
+                const dropped = [];
                 this.segments.forEach(seg => {
-                    foods.push({
+                    dropped.push({
+                        id: Math.random().toString(36).substr(2, 9),
                         x: seg.x + (Math.random() * 20 - 10),
                         y: seg.y + (Math.random() * 20 - 10),
                         radius: Math.random() * 5 + 4,
@@ -1446,39 +1530,26 @@
                     });
                 });
 
-                if (!this.isBot) onPlayerDeath();
-            }
-        }
+                if (socket && socket.connected) {
+                    socket.emit('player_died', dropped);
+                }
 
-        function spawnFood(count = 200) {
-            for (let i = 0; i < count; i++) {
-                foods.push({
-                    x: Math.random() * (WORLD_SIZE - 200) + 100,
-                    y: Math.random() * (WORLD_SIZE - 200) + 100,
-                    radius: Math.random() * 4 + 3,
-                    color: `hsl(${Math.random() * 360}, 90%, 60%)`,
-                    value: Math.floor(Math.random() * 3) + 1
-                });
+                onPlayerDeath();
             }
         }
 
         function checkCollisions() {
-            const allWorms = [player, ...bots].filter(w => w && !w.isDead);
+            if (!player || player.isDead) return;
 
-            allWorms.forEach(w1 => {
-                allWorms.forEach(w2 => {
-                    if (w1 === w2) return;
-                    w2.segments.forEach((seg, idx) => {
-                        if (idx < 3) return;
-                        const dist = Math.hypot(w1.x - seg.x, w1.y - seg.y);
-                        if (dist < w1.baseRadius + 5) {
-                            w1.die();
-                            if (w2 === player && w1 !== player) {
-                                sessionKills++;
-                                sessionCoins += 50 * state.upgrades.coins;
-                            }
-                        }
-                    });
+            const enemies = Object.values(onlinePlayers);
+            enemies.forEach(w2 => {
+                if (!w2 || w2.isDead) return;
+                w2.segments.forEach((seg, idx) => {
+                    if (idx < 2) return;
+                    const dist = Math.hypot(player.x - seg.x, player.y - seg.y);
+                    if (dist < player.baseRadius + 5) {
+                        player.die();
+                    }
                 });
             });
         }
@@ -1509,6 +1580,7 @@
             ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 6;
             ctx.strokeRect(-camera.x + canvas.width / 2, -camera.y + canvas.height / 2, WORLD_SIZE, WORLD_SIZE);
 
+            // Draw Foods
             foods = foods.filter(f => !f.eaten);
             foods.forEach(f => {
                 const screenX = f.x - camera.x + canvas.width / 2;
@@ -1524,28 +1596,15 @@
                 }
             });
 
-            if (foods.length < 250) spawnFood(50);
+            // Update & Render Online Friends (0 BOTS!)
+            Object.values(onlinePlayers).forEach(p => p.draw(camera));
 
-            if (player && !player.isDead) player.update();
-
-            bots.forEach((bot, index) => {
-                if (bot.isDead) {
-                    bots[index] = new Worm(
-                        Math.random() * (WORLD_SIZE - 200) + 100,
-                        Math.random() * (WORLD_SIZE - 200) + 100,
-                        'Игрок_' + Math.floor(Math.random() * 899 + 100),
-                        true,
-                        SKINS[Math.floor(Math.random() * SKINS.length)].id
-                    );
-                } else {
-                    bot.update();
-                }
-            });
+            if (player && !player.isDead) {
+                player.update();
+                player.draw(camera);
+            }
 
             checkCollisions();
-
-            bots.forEach(b => b.draw(camera));
-            if (player) player.draw(camera);
 
             updateHUD();
             drawMinimap();
@@ -1553,19 +1612,15 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         }
 
-        /* --- HUD & PING & LEADERBOARD --- */
+        /* --- HUD & LEADERBOARD --- */
         function updateHUD() {
             if (!player) return;
             document.getElementById('hud-score').innerText = Math.floor(player.score);
             document.getElementById('hud-kills').innerText = sessionKills;
             document.getElementById('hud-session-coins').innerText = `+${sessionCoins}`;
+            document.getElementById('hud-room-id').innerText = currentRoomId;
 
-            // Dynamic Ping Simulation (14 - 28 ms)
-            pingValue = Math.floor(18 + Math.sin(Date.now() / 1000) * 6);
-            document.getElementById('hud-ping').innerText = `${pingValue} ms`;
-            document.getElementById('hud-room-id').innerText = `#${currentRoomId}`;
-
-            const all = [player, ...bots].filter(w => w && !w.isDead).sort((a, b) => b.score - a.score).slice(0, 8);
+            const all = [player, ...Object.values(onlinePlayers)].filter(w => w && !w.isDead).sort((a, b) => b.score - a.score);
             const lbList = document.getElementById('lb-list');
             lbList.innerHTML = '';
 
@@ -1588,7 +1643,7 @@
             });
 
             miniCtx.fillStyle = '#ef4444';
-            bots.forEach(b => {
+            Object.values(onlinePlayers).forEach(b => {
                 if (!b.isDead) miniCtx.fillRect(b.x * scale - 1, b.y * scale - 1, 3, 3);
             });
 
@@ -1603,7 +1658,9 @@
         function startGame() {
             sfx.init();
             const nameInput = document.getElementById('nickname').value.trim() || 'Червячок';
-            const roomCode = document.getElementById('room-code-input').value.trim() || Math.floor(1000 + Math.random() * 9000).toString();
+            const roomCode = document.getElementById('room-code-input').value.trim().toUpperCase() || 'GLOBAL';
+            const noBotsOnlyFriends = document.getElementById('only-friends-checkbox').checked;
+
             currentRoomId = roomCode;
 
             document.getElementById('main-menu').style.display = 'none';
@@ -1614,18 +1671,16 @@
 
             player = new Worm(WORLD_SIZE / 2, WORLD_SIZE / 2, nameInput, false, state.equippedSkin);
 
-            bots = [];
-            for (let i = 0; i < 15; i++) {
-                bots.push(new Worm(
-                    Math.random() * (WORLD_SIZE - 200) + 100,
-                    Math.random() * (WORLD_SIZE - 200) + 100,
-                    'Игрок_' + (Math.floor(Math.random() * 899) + 100),
-                    true,
-                    SKINS[Math.floor(Math.random() * SKINS.length)].id
-                ));
-            }
+            // Connect & join server
+            if (!socket) connectSocketServer();
 
-            foods = []; spawnFood(250);
+            if (socket && socket.connected) {
+                socket.emit('join_room', {
+                    roomId: roomCode,
+                    name: nameInput,
+                    skinId: state.equippedSkin
+                });
+            }
 
             gameRunning = true;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
@@ -1659,6 +1714,7 @@
 
         loadState();
         drawMainSkinPreview();
+        connectSocketServer();
     </script>
 </body>
 </html>

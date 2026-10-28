@@ -12,11 +12,9 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 const WORLD_SIZE = 3000;
 
-// Serve static HTML game files
 app.use(express.static(path.join(__dirname, 'app/src/main/assets')));
 app.use(express.static(__dirname));
 
-// Active Rooms
 const rooms = {};
 
 function generateFoodBatch(count) {
@@ -38,12 +36,10 @@ io.on('connection', (socket) => {
   let currentRoomId = null;
   let playerId = socket.id;
 
-  // Real Ping Measurement
   socket.on('ping_check', (timestamp, callback) => {
     if (typeof callback === 'function') callback(timestamp);
   });
 
-  // Join online room
   socket.on('join_room', ({ roomId, name, skinId }) => {
     currentRoomId = roomId ? roomId.trim().toUpperCase() : 'GLOBAL';
     socket.join(currentRoomId);
@@ -68,7 +64,6 @@ io.on('connection', (socket) => {
       segments: []
     };
 
-    // Send initial room state to joining player
     socket.emit('init_room', {
       myId: playerId,
       roomId: currentRoomId,
@@ -76,11 +71,9 @@ io.on('connection', (socket) => {
       foods: rooms[currentRoomId].foods
     });
 
-    // Notify room of new player
     socket.to(currentRoomId).emit('player_joined', rooms[currentRoomId].players[playerId]);
   });
 
-  // Position & Movement Sync
   socket.on('update_position', (data) => {
     if (currentRoomId && rooms[currentRoomId] && rooms[currentRoomId].players[playerId]) {
       const p = rooms[currentRoomId].players[playerId];
@@ -91,7 +84,7 @@ io.on('connection', (socket) => {
       p.isBoosting = data.isBoosting;
       p.segments = data.segments;
 
-      // Relay to other players in room
+      // Broadcast full worm state (score, position, angle, segments) to all friends in room!
       socket.to(currentRoomId).emit('player_moved', {
         id: playerId,
         x: data.x,
@@ -104,7 +97,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Eat Food Event
   socket.on('eat_food', (foodId) => {
     if (currentRoomId && rooms[currentRoomId]) {
       const room = rooms[currentRoomId];
@@ -113,7 +105,6 @@ io.on('connection', (socket) => {
         room.foods.splice(idx, 1);
         io.to(currentRoomId).emit('food_eaten', foodId);
 
-        // Replenish food
         if (room.foods.length < 200) {
           const newFood = generateFoodBatch(10);
           room.foods.push(...newFood);
@@ -123,7 +114,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Player Died Event
   socket.on('player_died', (droppedFood) => {
     if (currentRoomId && rooms[currentRoomId] && rooms[currentRoomId].players[playerId]) {
       rooms[currentRoomId].players[playerId].isDead = true;
@@ -135,7 +125,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Disconnect
   socket.on('disconnect', () => {
     if (currentRoomId && rooms[currentRoomId]) {
       delete rooms[currentRoomId].players[playerId];
@@ -148,5 +137,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🌐 Worms Royale Online Server is active on port ${PORT}`);
+  console.log(`🌐 Worms Royale Online Server running on port ${PORT}`);
 });
